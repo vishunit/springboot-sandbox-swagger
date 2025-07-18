@@ -43,6 +43,7 @@ src/
 │       │   └── api-docs/ums.yaml
 │       └── application.properties
 
+
 ## 🔧 Configurations
 
 # application.properties
