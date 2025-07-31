@@ -1,15 +1,89 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Swagger UI</title>
-  <link rel="stylesheet" href="https://unpkg.com/swagger-ui-dist/swagger-ui.css" />
+  <meta charset="UTF-8" />
+  <title>My Custom Swagger UI</title>
+  <link rel="stylesheet" href="./swagger-ui.css" />
+
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+    }
+
+    #api-key-box {
+      position: absolute;
+      top: 25%;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #fff;
+      padding: 2rem;
+      border: 1px solid #ccc;
+      border-radius: 10px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+      z-index: 1000;
+    }
+
+    #swagger-ui {
+      display: none;
+    }
+
+    /* Wide logo styling */
+    .topbar-wrapper .link img {
+      height: 45px !important;
+      max-width: 220px !important;
+      width: auto;
+      object-fit: contain;
+      margin-right: 10px;
+    }
+
+    .topbar-wrapper span {
+      display: none !important;
+    }
+
+    /* Hide file input box */
+    .topbar .download-url-wrapper {
+      display: none !important;
+    }
+
+    /* Optional: hide extra margin beside logo */
+    .topbar-wrapper .link {
+      display: flex;
+      align-items: center;
+    }
+  </style>
 </head>
 <body>
-  <div id="swagger-ui"></div>
-  <script src="https://unpkg.com/swagger-ui-dist/swagger-ui-bundle.js"></script>
-  <script src="https://unpkg.com/swagger-ui-dist/swagger-ui-standalone-preset.js"></script>
-  <script>
+
+<!-- API Key Prompt -->
+<div id="api-key-box">
+  <label>Enter API Key:</label>
+  <input type="password" id="api-key" />
+  <button onclick="loadSwagger()">Submit</button>
+  <p id="error-msg" style="color:red;"></p>
+</div>
+
+<!-- Swagger UI container -->
+<div id="swagger-ui"></div>
+
+<script src="./swagger-ui-bundle.js"></script>
+<script src="./swagger-ui-standalone-preset.js"></script>
+
+<script>
+  const CORRECT_KEY = "123";
+
+  function loadSwagger() {
+    const enteredKey = document.getElementById("api-key").value;
+    const errorMsg = document.getElementById("error-msg");
+
+    if (enteredKey !== CORRECT_KEY) {
+      errorMsg.textContent = "Invalid API Key.";
+      return;
+    }
+
+    document.getElementById("api-key-box").style.display = "none";
+    document.getElementById("swagger-ui").style.display = "block";
+
     const ui = SwaggerUIBundle({
       url: "/api-docs/ums.yaml",
       dom_id: '#swagger-ui',
@@ -18,9 +92,30 @@
         SwaggerUIBundle.presets.apis,
         SwaggerUIStandalonePreset
       ],
-      layout: "StandaloneLayout"
+      layout: "StandaloneLayout",
+      requestInterceptor: (req) => {
+        req.headers['X-API-KEY'] = enteredKey;
+        return req;
+      }
     });
-  </script>
+
+    // Replace logo
+    const interval = setInterval(() => {
+      const topbarLink = document.querySelector('.topbar-wrapper .link');
+      const existingSvg = topbarLink?.querySelector('svg');
+
+      if (topbarLink && existingSvg) {
+        existingSvg.remove();
+
+        const img = document.createElement('img');
+        img.src = '/images/mylogo.png';
+        img.alt = 'My Logo';
+        topbarLink.prepend(img);
+
+        clearInterval(interval);
+      }
+    }, 200);
+  }
+</script>
 </body>
 </html>
-
